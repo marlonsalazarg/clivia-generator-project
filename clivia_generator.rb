@@ -1,8 +1,10 @@
 require "json"
 require "httparty"
+require_relative "requester"
 require_relative "presenter"
 
 class CliviaGenerator
+  include Requester
   include Presenter
   include HTTParty
   base_uri("https://opentdb.com")
@@ -19,21 +21,37 @@ class CliviaGenerator
     action = ""
     until action == "exit"
       puts print_welcome
-      action = gets.chomp.downcase
+      action = select_main_menu_action
       case action
-      when "random" then puts "Random Trivia"
-      when "scores" then puts "Scores"
-      when "exit" then puts "Goodbye!"
+      when "random" then random_trivia
+      when "scores" then print_scores
+      when "exit" then exit_message
       end
     end
   end
 
   def random_trivia
     # load the questions from the api
+    @results = load_questions
+    ask_questions
   end
 
   def ask_questions
-    # ask the questions
+    @results.each do |question|
+      answer, array, correct_answer = ask_question(question)
+      coder = HTMLEntities.new
+      correct_decode = coder.decode(correct_answer)
+      if array[answer - 1] == correct_answer
+        puts "#{correct_decode} Correct!"
+        @score += 10
+      else
+        puts "#{coder.decode(array[answer - 1])}... Incorrect!"
+        puts "The correct answer was: #{correct_decode}"
+      end
+    end
+    data = will_save?(@score)
+    save(data) unless data.nil?
+    @score = 0
   end
 
   def save(data)
@@ -54,5 +72,15 @@ class CliviaGenerator
 
   def parse_questions(response)
     JSON.parse(response.body, symbolize_names: true)
+  end
+
+  def print_scores
+    # print the scores sorted from top to bottom #
+    rows = @scores_parsed
+    title = "°°Top Scores°°"
+    headings = ["Name", "Score"]
+    rows = rows.sort_by { |row| row[:score] }.reverse
+    rows = rows.map { |row| [row[:name], row[:score]] }
+    print_score(title, headings, rows)
   end
 end
