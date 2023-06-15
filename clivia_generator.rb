@@ -42,11 +42,11 @@ class CliviaGenerator
       coder = HTMLEntities.new
       correct_decode = coder.decode(correct_answer)
       if array[answer - 1] == correct_answer
-        puts "#{correct_decode} Correct!"
+        puts "#{correct_decode} Correct!".colorize(color: :green, mode: :bold)
         @score += 10
       else
-        puts "#{coder.decode(array[answer - 1])}... Incorrect!"
-        puts "The correct answer was: #{correct_decode}"
+        puts "#{coder.decode(array[answer - 1])}... Incorrect!".colorize(:light_red)
+        puts "The correct answer was: #{correct_decode}".colorize(:light_green)
       end
     end
     data = will_save?(@score)
@@ -78,9 +78,9 @@ class CliviaGenerator
     # print the scores sorted from top to bottom #
     rows = @scores_parsed
     title = "°°Top Scores°°"
-    headings = ["Name", "Score"]
+    headings = ["Name".colorize(:red), "Score".colorize(:red)]
     rows = rows.sort_by { |row| row[:score] }.reverse
-    rows = rows.map { |row| [row[:name], row[:score]] }
-    print_score(title, headings, rows)
+    rows = rows.map { |row| [row[:name].colorize(:magenta), row[:score]] }
+    print_score(title.colorize(:light_magenta), headings, rows)
   end
 end

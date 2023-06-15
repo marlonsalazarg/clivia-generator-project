@@ -1,4 +1,5 @@
 require "htmlentities"
+require "colorize"
 module Requester
   def select_main_menu_action
     gets_option(["random", "scores", "exit"])
@@ -11,11 +12,11 @@ module Requester
     array_questions = question[:incorrect_answers]
     array_questions << question[:correct_answer]
     array_questions.shuffle!
-    puts "Category: #{question[:category]} | Difficulty: #{question[:difficulty]}"
-    puts "Question: #{question_decode}"
+    puts "Category: #{question[:category]} | Difficulty: #{question[:difficulty]}".colorize(:light_blue)
+    puts "Question: #{question_decode}".colorize(color: :blue, mode: :bold)
     array_questions.each_with_index do |option, index|
       option_decode = coder.decode(option)
-      puts "#{index + 1}. #{option_decode}"
+      puts "#{index + 1}. #{option_decode}".colorize(:light_yellow)
     end
     answer = validate_answer?(array_questions)
     [answer, array_questions, question[:correct_answer]]
@@ -45,7 +46,7 @@ module Requester
   def gets_option(options)
     action = ""
     until options.include?(action)
-      puts options.join(" | ")
+      puts options.join(" | ").colorize(color: :blue, mode: :bold)
       print "> "
       action = gets.chomp
       puts "Invalid option" unless options.include?(action)
